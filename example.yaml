@@ -1,0 +1,18 @@
+# Prometheus connection settings used by `slop check` and `slop gen --check`.
+prometheus:
+  # Base URL of your Prometheus, Thanos, or Mimir instance.
+  url: http://localhost:9090
+  # Optional Bearer token for authenticated endpoints (leave blank if unauthenticated).
+  token:
+
+# List of SLO definitions to calibrate and compile into Prometheus rules.
+slos:
+  - name: api-latency
+    # PromQL expression returning a numeric time series (without comparison operator/threshold).
+    query: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))
+    # Operator defining a GOOD sample (<, <=, >, >=, ==, or !=).
+    operator: <
+    # Limit for the good-sample condition (e.g. latency under 0.09s).
+    threshold: 0.09
+    # Target compliance ratio in (0, 1). Overwritten by `slop check -w` or `slop gen -c`.
+    objective: 0.99
